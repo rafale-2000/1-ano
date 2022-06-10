@@ -1,0 +1,629 @@
+APPS.JS
+import 'react-native-gesture-handler';
+
+import * as React from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+// tela de login
+import Login from './components/Login';
+import Produtos from './components/Produtos';
+import Servicos from './components/Servicos';
+import Usuarios from './components/Usuarios';
+import FlatBD from './components/FlatBD';
+
+// criar as variáveis baásicas de navegação
+const Stack = createStackNavigator();
+
+
+function App() {
+  return (
+    <NavigationContainer>
+        <Stack.Navigator
+        initialRouteName="Produtos"
+        screenOptions={{
+          headerStyle: { backgroundColor: '#1874CD' },
+          headerTintColor: 'yellow',
+          headerTitleStyle: { fontWeight: 'bold' },        
+        }}>
+        
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{ title: 'Login' }}
+        />
+
+        <Stack.Screen
+          name="Produtos"
+          component={Produtos}
+          options={{ title: 'Produtos' }}
+        />
+
+        <Stack.Screen
+          name="Servicos"
+          component={Servicos}
+          options={{ title: 'Serviços' }}
+        />
+
+        <Stack.Screen
+          name="Usuarios"
+          component={Servicos}
+          options={{ title: 'Usuarios' }}
+        />
+
+         <Stack.Screen
+          name="FlatBD"
+          component={FlatBD}
+          options={{ title: 'FlatBD' }}
+        />
+
+
+      
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default App
+
+COMPONENTS
+1.1 FLATBD
+import React, {Component, useState } from 'react';
+import {FlatList, StyleSheet,View, Text, SafeAreaView, TouchableOpacity } from 'react-native';
+
+const FlatBD = ({ route, navigation }) => {
+const [corBack,setBack]=useState("yellow")
+const [listaProdutos, setListaProdutos]=useState([])
+
+
+ //setListaProdutos([...listaProdutos, {nome:"produto 1"}]);
+
+const clickItemFlatList=item=>{
+   alert(JSON.stringify(item))
+   navigation.navigate('Servicos')
+}
+
+
+ async function getInformacoesBD() {
+    // endereço remoto do localhost (via ngrok)
+    //var url= "https://jsonplaceholder.typicode.com/todos";
+    var url= "https://jsonplaceholder.typicode.com/users";
+    // faz um fetch (requisição htpp ao script que está encarregado de 
+    // realizar a consulta de inf. no banco de dados)
+    const resposta = await   fetch(url, {
+            method: 'GET',//tipo de requisição
+    })
+    // quando o script php terminar de executar vai executar a próxima linha
+    .then((response) => response.json()) // os dados já vieram? Converte em JSON
+    .then((responseJson) => { // os dados já foram convertidoks
+    // mostra o que obteve do banco a partir do script
+    
+    for (var i=0;i<responseJson.length;i++){     
+      setListaProdutos(listaProdutos => {
+          /*const list = [...listaProdutos, {
+            id:responseJson[i].id, 
+            title:responseJson[i].title, 
+            completed:responseJson[i].completed
+            }];*/
+            const list = [...listaProdutos, {
+            id:responseJson[i].id, 
+            name:responseJson[i].name, 
+            username:responseJson[i].username,
+            email:responseJson[i].email
+            /*address:responseJson[i].address,
+            street:responseJson[i].street,
+            suite:responseJson[i].suite,
+            city:responseJson[i].city,
+            zipcode:responseJson[i].zipcode,
+            geo:responseJson[i].geo,
+            lat:responseJson[i].lat,
+            lng:responseJson[i].lng*/
+            }];
+          return list
+         })
+    }         
+    
+    })
+    //se ocorrer erro na requisição ou conversãok
+    .catch((error) => {
+         alert('erro')
+    });  
+
+
+
+}
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, padding: 16 }}>
+      
+          <Text
+            style={{
+              fontSize: 25,
+              textAlign: 'center',
+              marginBottom: 16,
+              fontFamily:'century gothic',
+            }}>
+            Produtos
+         </Text>  
+
+        <FlatList
+            data={listaProdutos}
+            renderItem={({item}) => (
+                  <TouchableOpacity onPress={ () => clickItemFlatList(item)}>
+                   <View style={{borderBottomWidth:1, borderTopWidth:1, borderLeftWidth:1, borderRightWidth:1, borderRadius:5, backgroundColor: (item.id %2)==0?"red":"blue"}}>
+
+                      <Text style={styles.fontTexto}>Código: {item.id}</Text>                  
+                      <Text style={styles.fontTexto}>Nome: {item.title} </Text> 
+                      
+                      {(item.completed)?(
+                        <Text style={styles.fontTexto}>completed: verdadeiro </Text>                                                           
+                      ):
+                        (<Text style={styles.fontTexto}>completed: falso </Text>                                                           
+                      )}
+                      
+
+                   </View>                          
+                   
+
+                </TouchableOpacity>
+            )}
+          />
+
+
+         
+
+         <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Login')}>
+            <Text>Voltar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => getInformacoesBD()}>
+            <Text>Recuperar informações B.D.</Text>
+          </TouchableOpacity>
+
+
+      </View>
+
+     
+     
+    </SafeAreaView>
+  );
+};
+
+export default FlatBD;
+const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    backgroundColor: '#8968CD',
+    padding: 10,
+    width: 300,
+    marginTop: 16,
+  },
+
+  
+   baseText: {   //textos em cima dos botões  
+      margin: 16,
+      fontWeight: 'bold',
+      fontSize:18,
+      fontFamily:'century gothic',
+    },
+
+    fontTexto: { 
+      margin: 4,
+      fontWeight: 'italic',
+      fontSize:10,
+      fontFamily:'century gothic',
+      color:"white"
+    },
+  
+});
+LOGIN
+import React, { useState } from 'react';
+import { Image, Alert, Button, TextInput, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+
+const Login = ({ route, navigation }) => {  
+  const [username,setUsername]=useState("")
+  const [password,setPassword]=useState("")
+
+  function onLogin(){
+    if ((username=='teste')&&(password=='123'))
+        navigation.navigate('Usuarios')
+    else
+        alert("Não permitido")    
+  }
+
+  return (      
+      <View style={styles.container}>        
+        <View style={{paddingBottom:50,}}>
+          <Image style={{height:150, width:150}} 
+                source={require("../assets/userLogin.jpg")}
+          />
+        </View>
+        <TextInput
+          value={username}
+          onChangeText={(username) => setUsername(username)}
+          placeholder={'Entre com Username'}
+          style={styles.input}
+        />
+        <TextInput
+          value={password}
+          onChangeText={(password) => setPassword(password)}
+          placeholder={'Password'}
+          secureTextEntry={true}
+          style={styles.input}
+        />
+
+     
+
+
+        <TouchableOpacity
+              style={styles.button}
+              //onPress={() => navigation.navigate('Pagina2')}>
+              onPress={() => onLogin()}>
+              
+              <Text style={{color:"white", padding:10}}>LOGIN </Text>
+        </TouchableOpacity>
+
+        
+
+      </View>
+    );
+  }
+export default Login;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ecf0f1',
+    padding:50,
+  },
+  input: {
+    width: 250,
+    height: 44,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'blue',
+    marginBottom: 10,
+  },
+  button: {
+    width: "100%",
+    height: 40,        
+    borderWidth: 1,
+    borderColor: 'black',
+    marginBottom: 10,
+    borderRadius:5,
+    backgroundColor: "#0000FF",
+     alignItems: 'center',
+    
+  },
+});
+produtos
+import React, {Component, useState } from 'react';
+import {FlatList, StyleSheet,View, Text, SafeAreaView, TouchableOpacity, Image } from 'react-native';
+
+const Produtos = ({ route, navigation }) => {
+const [corBack,setBack]=useState("yellow")
+const [listaProdutos, setListaProdutos]=useState(
+  [
+        {
+          idProd: '1',
+          nome: 'Produto 1',
+          precoVenda:10.00,
+          quantEsq:5,
+          imagem: require('../assets/userLogin.jpg'),
+        },
+        { idProd: '2',
+          nome: 'Produto 2',
+          precoVenda:20.00,
+          quantEsq:15,
+          imagem: require('../assets/userLogin.jpg'),
+          
+        },
+        {
+          idProd: '3',
+          nome: 'Produto 3',
+          precoVenda:30.00,
+          quantEsq:15,
+          imagem: require('../assets/userLogin.jpg'),
+        },
+        {
+          idProd: '4',
+          nome: 'Produto 4',
+          precoVenda:10.00,
+          quantEsq:5,
+          imagem: require('../assets/userLogin.jpg'),
+        }
+  
+  ])
+
+
+ //setListaProdutos([...listaProdutos, {nome:"produto 1"}]);
+
+const clickItemFlatList=item=>{
+   //alert(item.nome)
+   navigation.navigate('Servicos')
+}
+
+
+ async function getInformacoesBD() {
+    // endereço remoto do localhost (via ngrok)
+    var url= "https://jsonplaceholder.typicode.com/users";
+    // faz um fetch (requisição htpp ao script que está encarregado de 
+    // realizar a consulta de inf. no banco de dados)
+    const infoResponse = await   fetch(url, {
+            method: 'GET',//tipo de requisição
+    })
+    // quando o script php terminar de executar vai executar a próxima linha
+    .then((response) => response.json()) // os dados já vieram? Converte em JSON
+    .then((responseJson) => { // os dados já foram convertidoks
+    // mostra o que obteve do banco a partir do script
+    //alert(JSON.stringify(responseJson));
+    // Converte as informações em um array        
+    const dataArray = JSON.stringify(responseJson);
+    // converte o array em um array de objetos JSON
+    var obj = JSON.parse(dataArray);
+    // percorre com laçao for todo o array 
+    //for (var i=0;i<obj.length;i++){            
+    for (var i=0;i<10;i++){            
+         alert(obj[i].id+","+obj[i].name)                        
+       }         
+    })
+    //se ocorrer erro na requisição ou conversãok
+    .catch((error) => {
+         alert('erro')
+    });            
+}
+
+
+
+
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, padding: 16 }}>
+      
+          <Text
+            style={{
+              fontSize: 25,
+              textAlign: 'center',
+              marginBottom: 16,
+              fontFamily:'century gothic',
+            }}>
+            Produtos
+         </Text>  
+
+        <FlatList
+            data={listaProdutos}
+            renderItem={({item}) => (
+                  <TouchableOpacity onPress={ () => clickItemFlatList(item)}>
+                   <View style={{borderBottomWidth:1, borderTopWidth:1, borderLeftWidth:1, borderRightWidth:1, borderRadius:5, backgroundColor: (item.idProd %2)==0?"red":"blue"}}>
+                  <View>
+                  <Image style={{height:50, width:50}} 
+                        source={item.imagem}
+                    />
+                  </View>  
+
+                      <Text style={styles.fontTexto}>Código: {item.idProd}</Text>                  
+                      <Text style={styles.fontTexto}>Nome: {item.nome} </Text>                              
+                      <Text style={styles.fontTexto}>Valor: R$ {item.precoVenda}</Text>     
+                      <Text style={styles.fontTexto}>Estoque: {item.quantEsq}</Text>  
+                   </View>                          
+                   
+
+                </TouchableOpacity>
+            )}
+          />
+
+
+         
+
+         <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Usuarios')}>
+            <Text>Voltar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => getInformacoesBD()}>
+            <Text>Recuperar informações B.D.</Text>
+          </TouchableOpacity>
+
+
+      </View>
+
+     
+     
+    </SafeAreaView>
+  );
+};
+
+export default Produtos;
+const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    backgroundColor: '#8968CD',
+    padding: 10,
+    width: 300,
+    marginTop: 16,
+  },
+
+  
+   baseText: {   //textos em cima dos botões  
+      margin: 16,
+      fontWeight: 'bold',
+      fontSize:18,
+      fontFamily:'century gothic',
+    },
+
+    fontTexto: { 
+      margin: 4,
+      fontWeight: 'italic',
+      fontSize:10,
+      fontFamily:'century gothic',
+      color:"white"
+    },
+  
+});
+SERVICOS
+import React, {Component, useState } from 'react';
+import {FlatList, StyleSheet,View, Text, SafeAreaView, TouchableOpacity, Image } from 'react-native';
+
+const Produtos = ({ route, navigation }) => {
+const [corBack,setBack]=useState("yellow")
+const [listaProdutos, setListaProdutos]=useState(
+  [
+        {
+          idProd: '1',
+          nome: 'Produto 1',
+          precoVenda:10.00,
+          quantEsq:5,
+          imagem: require('../assets/userLogin.jpg'),
+        },
+        { idProd: '2',
+          nome: 'Produto 2',
+          precoVenda:20.00,
+          quantEsq:15,
+          imagem: require('../assets/userLogin.jpg'),
+          
+        },
+        {
+          idProd: '3',
+          nome: 'Produto 3',
+          precoVenda:30.00,
+          quantEsq:15,
+          imagem: require('../assets/userLogin.jpg'),
+        },
+        {
+          idProd: '4',
+          nome: 'Produto 4',
+          precoVenda:10.00,
+          quantEsq:5,
+          imagem: require('../assets/userLogin.jpg'),
+        }
+  
+  ])
+
+
+ //setListaProdutos([...listaProdutos, {nome:"produto 1"}]);
+
+const clickItemFlatList=item=>{
+   //alert(item.nome)
+   navigation.navigate('Servicos')
+}
+
+
+ async function getInformacoesBD() {
+    // endereço remoto do localhost (via ngrok)
+    var url= "https://jsonplaceholder.typicode.com/users";
+    // faz um fetch (requisição htpp ao script que está encarregado de 
+    // realizar a consulta de inf. no banco de dados)
+    const infoResponse = await   fetch(url, {
+            method: 'GET',//tipo de requisição
+    })
+    // quando o script php terminar de executar vai executar a próxima linha
+    .then((response) => response.json()) // os dados já vieram? Converte em JSON
+    .then((responseJson) => { // os dados já foram convertidoks
+    // mostra o que obteve do banco a partir do script
+    //alert(JSON.stringify(responseJson));
+    // Converte as informações em um array        
+    const dataArray = JSON.stringify(responseJson);
+    // converte o array em um array de objetos JSON
+    var obj = JSON.parse(dataArray);
+    // percorre com laçao for todo o array 
+    //for (var i=0;i<obj.length;i++){            
+    for (var i=0;i<10;i++){            
+         alert(obj[i].id+","+obj[i].title)                        
+       }         
+    })
+    //se ocorrer erro na requisição ou conversãok
+    .catch((error) => {
+         alert('erro')
+    });            
+}
+
+
+
+
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, padding: 16 }}>
+      
+          <Text
+            style={{
+              fontSize: 25,
+              textAlign: 'center',
+              marginBottom: 16,
+              fontFamily:'century gothic',
+            }}>
+            Produtos
+         </Text>  
+
+        <FlatList
+            data={listaProdutos}
+            renderItem={({item}) => (
+                  <TouchableOpacity onPress={ () => clickItemFlatList(item)}>
+                   <View style={{borderBottomWidth:1, borderTopWidth:1, borderLeftWidth:1, borderRightWidth:1, borderRadius:5, backgroundColor: (item.idProd %2)==0?"red":"blue"}}>
+                  <View>
+                  <Image style={{height:50, width:50}} 
+                        source={item.imagem}
+                    />
+                  </View>  
+
+                      <Text style={styles.fontTexto}>Código: {item.idProd}</Text>                  
+                      <Text style={styles.fontTexto}>Nome: {item.nome} </Text>                              
+                      <Text style={styles.fontTexto}>Valor: R$ {item.precoVenda}</Text>     
+                      <Text style={styles.fontTexto}>Estoque: {item.quantEsq}</Text>  
+                   </View>                          
+                   
+
+                </TouchableOpacity>
+            )}
+          />
+
+
+         
+
+         <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Login')}>
+            <Text>Voltar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => getInformacoesBD()}>
+            <Text>Recuperar informações B.D.</Text>
+          </TouchableOpacity>
+
+
+      </View>
+
+     
+     
+    </SafeAreaView>
+  );
+};
+
+export default Produtos;
+const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    backgroundColor: '#8968CD',
+    padding: 10,
+    width: 300,
+    marginTop: 16,
+  },
+  
+});
+
+v
