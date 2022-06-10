@@ -1,0 +1,119 @@
+APPS.JS
+import * as React from 'react';
+import { Text, View, StyleSheet } from 'react-native';
+import Constants from 'expo-constants';
+
+// You can import from local files
+import AssetExample from './components/AssetExample';
+
+// or any pure javascript modules available in npm
+import { Card } from 'react-native-paper';
+
+export default function App() {
+  return (
+    <View style={styles.container}>
+   
+    
+        <AssetExample />
+     
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingTop: Constants.statusBarHeight,
+    backgroundColor: '#ecf0f1',
+    padding: 8,
+  },
+ 
+});
+
+COMPONENTS
+ import React, { Component} from "react"
+import { Dimensions, StyleSheet,Text, Image, View } from "react-native";
+
+import MapView, {Marker} from "react-native-maps";
+import MapViewDirections from "react-native-maps-directions";
+
+
+const { width, height } = Dimensions.get("window");
+const ASPECT_RATIO = width / height;
+const LATITUDE = -23.221;
+const LONGITUDE = -45.905;
+const LATITUDE_DELTA = 0.01;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+
+//const GOOGLE_MAPS_APIKEY =  'AIzaSyAlpTF8LRjEjpHJG7vKm_NmWtwZYW9UMGM';
+const GOOGLE_MAPS_APIKEY =  'AIzaSyAlpTF8LRjEjpHJG7vKm_NmWtwZYW9UMGM';
+class Example extends Component {
+  constructor(props) {
+    super(props);
+
+    // AirBnB's Office, and Apple Park
+    this.state = {
+      coordinates: [
+        {
+          latitude:-23.222738715670787,
+          longitude:  -45.90590597499309,
+        },
+        
+        
+      ],
+       coordinates2: [
+        {
+          latitude:-23.21980614113274,
+          longitude: -45.90672469229734,
+        },
+        ]
+    };
+
+    this.mapView = null;
+  }
+
+  onMapPress = e => {
+    this.setState({
+      coordinates: [...this.state.coordinates, e.nativeEvent.coordinate]
+    });
+  };
+
+  render() {
+    return (
+      <MapView
+        
+        initialRegion={{
+          latitude: LATITUDE,
+          longitude: LONGITUDE,
+          latitudeDelta: LATITUDE_DELTA,
+          longitudeDelta: LONGITUDE_DELTA
+        }}
+        style={StyleSheet.absoluteFill}
+        ref={c => (this.mapView = c)}
+        onPress={this.onMapPress}
+      >
+        {this.state.coordinates.map((coordinate, index) => (
+          //<MapView.Marker key={`coordinate_${index}`} coordinate={coordinate} image={"https://fastly.4sqi.net/img/general/600x600/-ZD_7664tbOgeOBP0nMpRG9e7MbQ0FrcQ1Cr4_zYz0k.jpg"}/>
+            <Marker coordinate={coordinate} >
+            <Image source={require('../assets/1.jpg')} style={{height: 105, width:105 }} />
+            </Marker>
+
+      
+          
+        ))}
+          {this.state.coordinates2.map((coordinate, index) => (
+         //<MapView.Marker key={`coordinate_${index}`} coordinate={coordinate} image={"https://etec2022.com.br/wp-content/uploads/2021/05/etec-vieira-macedo-divulgacao-1024x768-1.jpg"} />
+         <Marker coordinate={coordinate} >
+            <Image source={require('../assets/2.jpg')} style={{height: 105, width:105 }} />
+            </Marker>
+       
+        ))}
+        
+      </MapView>
+    );
+  }
+}
+
+export default Example;
+
